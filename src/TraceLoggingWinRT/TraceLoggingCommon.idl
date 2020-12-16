@@ -1,0 +1,19 @@
+
+namespace TraceLogging
+{
+    runtimeclass TraceLoggingCommon
+    {
+        static TraceLoggingCommon GetInstance();
+
+        void LogLevel1Event(String eventName, Windows.Foundation.Diagnostics.LoggingFields fields);
+        void LogLevel2Event(String eventName, Windows.Foundation.Diagnostics.LoggingFields fields);
+        void LogLevel3Event(String eventName, Windows.Foundation.Diagnostics.LoggingFields fields);
+
+        Boolean GetTraceLoggingProviderEnabled
+        {
+            get;
+        };
+    }
+}
+
+
