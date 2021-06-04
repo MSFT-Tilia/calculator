@@ -43,6 +43,13 @@
   <PropertyGroup>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
+  <ImportGroup>
+    <Import Project="$(SolutionDir)\GraphControl\GraphingImplOverrides.props" Condition="Exists('$(SolutionDir)\GraphControl\GraphingImplOverrides.props')" />
+  </ImportGroup>
+  <ItemGroup Condition="'$(UseMockGraphingImpl)' == 'false'">
+    <Content Include="$(GraphingImplDll)"/>
+    <Content Include="$(GraphingEngineDll)"/>
+  </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\x86\Debug\Calculator\</OutputPath>
