@@ -10,6 +10,30 @@ namespace CalculatorApp
 {
     public class PerfUtils
     {
+        public class ScopedLog : IDisposable
+        {
+            public ScopedLog(PerfUtils utils, string message)
+            {
+                _utils = utils;
+                _msg = message;
+                _utils.WriteLine($"ScopedLog | {_msg} | begins ");
+            }
+
+            ~ScopedLog()
+            {
+                _utils.WriteLine($"ScopedLog | {_msg} | ends with bad timing");
+            }
+
+            public void Dispose()
+            {
+                _utils.WriteLine($"ScopedLog | {_msg} | ends");
+                GC.SuppressFinalize(this);
+            }
+
+            private PerfUtils _utils;
+            private string _msg;
+        }
+
         public readonly static PerfUtils Default = new PerfUtils();
 
         public PerfUtils()
@@ -26,7 +50,12 @@ namespace CalculatorApp
             _workthread.Start();
         }
 
-        public void Write(string content)
+        public ScopedLog CreateScopedLog(string content)
+        {
+            return new ScopedLog(this, content);
+        }
+
+        public void WriteLine(string content)
         {
             var date = DateTime.UtcNow;
             var prefix = $"{date.ToString("dd-MM-yy hh:mm:ss.ff")} | ";
@@ -62,7 +91,7 @@ namespace CalculatorApp
                     {
                         FileIO.AppendTextAsync(_file, req.Value.Content).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
                     }
-                    Monitor.Wait(_workthread);
+                    Monitor.Wait(_workthread, 2000);
                 }
             }
         }

@@ -30,25 +30,28 @@ namespace CalculatorApp
     {
         public MainPage()
         {
-            m_model = new ViewModel.ApplicationViewModel();
-            InitializeComponent();
+            using (PerfUtils.Default.CreateScopedLog("MainPage.MainPage()"))
+            {
+                m_model = new ViewModel.ApplicationViewModel();
+                InitializeComponent();
 
-            KeyboardShortcutManager.Initialize();
+                KeyboardShortcutManager.Initialize();
 
-            Application.Current.Suspending += App_Suspending;
-            m_model.PropertyChanged += OnAppPropertyChanged;
-            m_accessibilitySettings = new AccessibilitySettings();
+                Application.Current.Suspending += App_Suspending;
+                m_model.PropertyChanged += OnAppPropertyChanged;
+                m_accessibilitySettings = new AccessibilitySettings();
 
-            // CSHARP_MIGRAION: TODO: find another implementation for C#
-            //double sizeInInches = 0.0;
+                // CSHARP_MIGRAION: TODO: find another implementation for C#
+                //double sizeInInches = 0.0;
 
-            //if (SUCCEEDED(GetIntegratedDisplaySize(&sizeInInches)))
-            //{
-            //    if (sizeInInches < 7.0) // If device's display size (diagonal length) is less than 7 inches then keep the calc always in Portrait mode only
-            //    {
-            //        DisplayInformation.AutoRotationPreferences = DisplayOrientations.Portrait | DisplayOrientations.PortraitFlipped;
-            //    }
-            //}
+                //if (SUCCEEDED(GetIntegratedDisplaySize(&sizeInInches)))
+                //{
+                //    if (sizeInInches < 7.0) // If device's display size (diagonal length) is less than 7 inches then keep the calc always in Portrait mode only
+                //    {
+                //        DisplayInformation.AutoRotationPreferences = DisplayOrientations.Portrait | DisplayOrientations.PortraitFlipped;
+                //    }
+                //}
+            }
         }
 
         public CalculatorApp.ViewModel.ApplicationViewModel Model
@@ -133,23 +136,26 @@ namespace CalculatorApp
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewMode initialMode = ViewMode.Standard;
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavigatedTo"))
+            {
+                ViewMode initialMode = ViewMode.Standard;
 
-            string stringParameter = (e.Parameter as string);
-            if (!string.IsNullOrEmpty(stringParameter))
-            {
-                initialMode = (ViewMode)Convert.ToInt32(stringParameter);
-            }
-            else
-            {
-                ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-                if (localSettings.Values.ContainsKey(ApplicationViewModel.ModePropertyName))
+                string stringParameter = (e.Parameter as string);
+                if (!string.IsNullOrEmpty(stringParameter))
                 {
-                    initialMode = NavCategory.Deserialize(localSettings.Values[ApplicationViewModel.ModePropertyName]);
+                    initialMode = (ViewMode)Convert.ToInt32(stringParameter);
                 }
-            }
+                else
+                {
+                    ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+                    if (localSettings.Values.ContainsKey(ApplicationViewModel.ModePropertyName))
+                    {
+                        initialMode = NavCategory.Deserialize(localSettings.Values[ApplicationViewModel.ModePropertyName]);
+                    }
+                }
 
-            m_model.Initialize(initialMode);
+                m_model.Initialize(initialMode);
+            }
         }
 
         private void WindowSizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
@@ -160,103 +166,109 @@ namespace CalculatorApp
 
         private void OnAppPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            string propertyName = e.PropertyName;
-            if (propertyName == ApplicationViewModel.ModePropertyName)
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnAppPropertyChanged"))
             {
-                ViewMode newValue = m_model.Mode;
-                ViewMode previousMode = m_model.PreviousMode;
-
-                KeyboardShortcutManager.DisableShortcuts(false);
-
-                if (newValue == ViewMode.Standard)
+                string propertyName = e.PropertyName;
+                if (propertyName == ApplicationViewModel.ModePropertyName)
                 {
-                    EnsureCalculator();
-                    m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = true;
-                    m_calculator.AnimateCalculator(NavCategory.IsConverterViewMode(previousMode));
-                    m_model.CalculatorViewModel.HistoryVM.ReloadHistory(newValue);
-                }
-                else if (newValue == ViewMode.Scientific)
-                {
-                    EnsureCalculator();
-                    m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = true;
-                    if (m_model.PreviousMode != ViewMode.Scientific)
+                    ViewMode newValue = m_model.Mode;
+                    ViewMode previousMode = m_model.PreviousMode;
+
+                    KeyboardShortcutManager.DisableShortcuts(false);
+
+                    if (newValue == ViewMode.Standard)
                     {
+                        EnsureCalculator();
+                        m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = true;
                         m_calculator.AnimateCalculator(NavCategory.IsConverterViewMode(previousMode));
+                        m_model.CalculatorViewModel.HistoryVM.ReloadHistory(newValue);
                     }
-
-                    m_model.CalculatorViewModel.HistoryVM.ReloadHistory(newValue);
-                }
-                else if (newValue == ViewMode.Programmer)
-                {
-                    m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = false;
-                    EnsureCalculator();
-                    if (m_model.PreviousMode != ViewMode.Programmer)
+                    else if (newValue == ViewMode.Scientific)
                     {
-                        m_calculator.AnimateCalculator(NavCategory.IsConverterViewMode(previousMode));
+                        EnsureCalculator();
+                        m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = true;
+                        if (m_model.PreviousMode != ViewMode.Scientific)
+                        {
+                            m_calculator.AnimateCalculator(NavCategory.IsConverterViewMode(previousMode));
+                        }
+
+                        m_model.CalculatorViewModel.HistoryVM.ReloadHistory(newValue);
                     }
-                }
-                else if (NavCategory.IsDateCalculatorViewMode(newValue))
-                {
-                    if (m_model.CalculatorViewModel != null)
+                    else if (newValue == ViewMode.Programmer)
                     {
                         m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = false;
+                        EnsureCalculator();
+                        if (m_model.PreviousMode != ViewMode.Programmer)
+                        {
+                            m_calculator.AnimateCalculator(NavCategory.IsConverterViewMode(previousMode));
+                        }
                     }
-                    EnsureDateCalculator();
-                }
-                else if (newValue == ViewMode.Graphing)
-                {
-                    EnsureGraphingCalculator();
-                    KeyboardShortcutManager.DisableShortcuts(true);
-                }
-                else if (NavCategory.IsConverterViewMode(newValue))
-                {
-                    if (m_model.CalculatorViewModel != null)
+                    else if (NavCategory.IsDateCalculatorViewMode(newValue))
                     {
-                        m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = false;
+                        if (m_model.CalculatorViewModel != null)
+                        {
+                            m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = false;
+                        }
+                        EnsureDateCalculator();
                     }
-
-                    EnsureConverter();
-                    if (!NavCategory.IsConverterViewMode(previousMode))
+                    else if (newValue == ViewMode.Graphing)
                     {
-                        m_converter.AnimateConverter();
+                        EnsureGraphingCalculator();
+                        KeyboardShortcutManager.DisableShortcuts(true);
                     }
+                    else if (NavCategory.IsConverterViewMode(newValue))
+                    {
+                        if (m_model.CalculatorViewModel != null)
+                        {
+                            m_model.CalculatorViewModel.HistoryVM.AreHistoryShortcutsEnabled = false;
+                        }
+
+                        EnsureConverter();
+                        if (!NavCategory.IsConverterViewMode(previousMode))
+                        {
+                            m_converter.AnimateConverter();
+                        }
+                    }
+
+                    ShowHideControls(newValue);
+
+                    UpdateViewState();
+                    SetDefaultFocus();
                 }
-
-                ShowHideControls(newValue);
-
-                UpdateViewState();
-                SetDefaultFocus();
-            }
-            else if (propertyName == ApplicationViewModel.CategoryNamePropertyName)
-            {
-                SetHeaderAutomationName();
-                AnnounceCategoryName();
+                else if (propertyName == ApplicationViewModel.CategoryNamePropertyName)
+                {
+                    SetHeaderAutomationName();
+                    AnnounceCategoryName();
+                }
             }
         }
 
         private void OnNavLoaded(object sender, RoutedEventArgs e)
         {
-            if (NavView.SelectedItem == null)
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavLoaded"))
             {
-                var menuItems = ((ObservableCollection<object>)NavView.MenuItemsSource);
-                var itemCount = ((int)menuItems.Count);
-                var flatIndex = NavCategory.GetFlatIndex(Model.Mode);
-
-                if (flatIndex >= 0 && flatIndex < itemCount)
+                if (NavView.SelectedItem == null)
                 {
-                    NavView.SelectedItem = menuItems[flatIndex];
+                    var menuItems = ((ObservableCollection<object>)NavView.MenuItemsSource);
+                    var itemCount = ((int)menuItems.Count);
+                    var flatIndex = NavCategory.GetFlatIndex(Model.Mode);
+
+                    if (flatIndex >= 0 && flatIndex < itemCount)
+                    {
+                        NavView.SelectedItem = menuItems[flatIndex];
+                    }
                 }
-            }
 
-            var acceleratorList = new List<MyVirtualKey>();
-            NavCategory.GetCategoryAcceleratorKeys(acceleratorList);
+                var acceleratorList = new List<MyVirtualKey>();
+                NavCategory.GetCategoryAcceleratorKeys(acceleratorList);
 
-            foreach (var accelerator in acceleratorList)
-            {
-                NavView.SetValue(KeyboardShortcutManager.VirtualKeyAltChordProperty, accelerator);
+                foreach (var accelerator in acceleratorList)
+                {
+                    NavView.SetValue(KeyboardShortcutManager.VirtualKeyAltChordProperty, accelerator);
+                }
+                // Special case logic for Ctrl+E accelerator for Date Calculation Mode
+                NavView.SetValue(KeyboardShortcutManager.VirtualKeyControlChordProperty, MyVirtualKey.E);
             }
-            // Special case logic for Ctrl+E accelerator for Date Calculation Mode
-            NavView.SetValue(KeyboardShortcutManager.VirtualKeyControlChordProperty, MyVirtualKey.E);
         }
 
         private void OnNavPaneOpening(MUXC.NavigationView sender, object args)
@@ -285,11 +297,14 @@ namespace CalculatorApp
 
         private void OnNavSelectionChanged(object sender, MUXC.NavigationViewSelectionChangedEventArgs e)
         {
-            var item = (e.SelectedItemContainer as MUXC.NavigationViewItem);
-            if (item != null)
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavSelectionChanged"))
             {
-                var selectedItem = ((NavCategory)item.DataContext);
-                Model.Mode = selectedItem.Mode;
+                var item = (e.SelectedItemContainer as MUXC.NavigationViewItem);
+                if (item != null)
+                {
+                    var selectedItem = ((NavCategory)item.DataContext);
+                    Model.Mode = selectedItem.Mode;
+                }
             }
         }
 
@@ -338,35 +353,41 @@ namespace CalculatorApp
 
         private MUXC.NavigationViewItemHeader CreateNavViewHeaderFromGroup(NavCategoryGroup group)
         {
-            var header = new MUXC.NavigationViewItemHeader();
-            header.DataContext = group;
+            using (PerfUtils.Default.CreateScopedLog("MainPage.CreateNavViewHeaderFromGroup"))
+            {
+                var header = new MUXC.NavigationViewItemHeader();
+                header.DataContext = group;
 
-            header.Content = group.Name;
-            AutomationProperties.SetName(header, group.AutomationName);
-            AutomationProperties.SetHeadingLevel(header, Windows.UI.Xaml.Automation.Peers.AutomationHeadingLevel.Level1);
+                header.Content = group.Name;
+                AutomationProperties.SetName(header, group.AutomationName);
+                AutomationProperties.SetHeadingLevel(header, Windows.UI.Xaml.Automation.Peers.AutomationHeadingLevel.Level1);
 
-            return header;
+                return header;
+            }
         }
 
         private MUXC.NavigationViewItem CreateNavViewItemFromCategory(NavCategory category)
         {
-            var item = new MUXC.NavigationViewItem();
-            item.DataContext = category;
+            using (PerfUtils.Default.CreateScopedLog("MainPage.CreateNavViewItemFromCategory"))
+            {
+                var item = new MUXC.NavigationViewItem();
+                item.DataContext = category;
 
-            var icon = new FontIcon();
-            icon.FontFamily = (Windows.UI.Xaml.Media.FontFamily)(App.Current.Resources["CalculatorFontFamily"]);
-            icon.Glyph = category.Glyph;
-            item.Icon = icon;
+                var icon = new FontIcon();
+                icon.FontFamily = (Windows.UI.Xaml.Media.FontFamily)(App.Current.Resources["CalculatorFontFamily"]);
+                icon.Glyph = category.Glyph;
+                item.Icon = icon;
 
-            item.Content = category.Name;
-            item.AccessKey = category.AccessKey;
-            item.IsEnabled = category.IsEnabled;
-            item.Style = (Windows.UI.Xaml.Style)(Resources["NavViewItemStyle"]);
+                item.Content = category.Name;
+                item.AccessKey = category.AccessKey;
+                item.IsEnabled = category.IsEnabled;
+                item.Style = (Windows.UI.Xaml.Style)(Resources["NavViewItemStyle"]);
 
-            AutomationProperties.SetName(item, category.AutomationName);
-            AutomationProperties.SetAutomationId(item, category.AutomationId);
+                AutomationProperties.SetName(item, category.AutomationName);
+                AutomationProperties.SetAutomationId(item, category.AutomationId);
 
-            return item;
+                return item;
+            }
         }
 
         private void ShowHideControls(ViewMode mode)
@@ -430,32 +451,35 @@ namespace CalculatorApp
 
         private void OnPageLoaded(object sender, RoutedEventArgs args)
         {
-            if (m_converter == null && m_calculator == null && m_dateCalculator == null && m_graphingCalculator == null)
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnPageLoaded"))
             {
-                // We have just launched into our default mode (standard calc) so ensure calc is loaded
-                EnsureCalculator();
-                m_model.CalculatorViewModel.IsStandard = true;
-            }
-
-            Window.Current.SizeChanged += WindowSizeChanged;
-            m_accessibilitySettings.HighContrastChanged += OnHighContrastChanged;
-            UpdateViewState();
-
-            SetHeaderAutomationName();
-            SetDefaultFocus();
-
-            // Delay load things later when we get a chance.
-            _ = Dispatcher.RunAsync(
-                CoreDispatcherPriority.Normal, new DispatchedHandler(() =>
+                if (m_converter == null && m_calculator == null && m_dateCalculator == null && m_graphingCalculator == null)
                 {
-                    if (TraceLogger.GetInstance().IsWindowIdInLog(ApplicationView.GetApplicationViewIdForWindow(CoreWindow.GetForCurrentThread())))
-                    {
-                        AppLifecycleLogger.GetInstance().LaunchUIResponsive();
-                        AppLifecycleLogger.GetInstance().LaunchVisibleComplete();
-                    }
+                    // We have just launched into our default mode (standard calc) so ensure calc is loaded
+                    EnsureCalculator();
+                    m_model.CalculatorViewModel.IsStandard = true;
+                }
 
-                    FindName("NavView");
-                }));
+                Window.Current.SizeChanged += WindowSizeChanged;
+                m_accessibilitySettings.HighContrastChanged += OnHighContrastChanged;
+                UpdateViewState();
+
+                SetHeaderAutomationName();
+                SetDefaultFocus();
+
+                // Delay load things later when we get a chance.
+                _ = Dispatcher.RunAsync(
+                    CoreDispatcherPriority.Normal, new DispatchedHandler(() =>
+                    {
+                        if (TraceLogger.GetInstance().IsWindowIdInLog(ApplicationView.GetApplicationViewIdForWindow(CoreWindow.GetForCurrentThread())))
+                        {
+                            AppLifecycleLogger.GetInstance().LaunchUIResponsive();
+                            AppLifecycleLogger.GetInstance().LaunchVisibleComplete();
+                        }
+
+                        FindName("NavView");
+                    }));
+            }
         }
 
         private void App_Suspending(object sender, Windows.ApplicationModel.SuspendingEventArgs e)
@@ -470,81 +494,93 @@ namespace CalculatorApp
 
         private void EnsureCalculator()
         {
-            if (m_calculator == null)
+            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureCalculator"))
             {
-                // delay load calculator.
-                m_calculator = new Calculator();
-                m_calculator.Name = "Calculator";
-                m_calculator.DataContext = m_model.CalculatorViewModel;
-                Binding isStandardBinding = new Binding();
-                isStandardBinding.Path = new PropertyPath("IsStandard");
-                m_calculator.SetBinding(Calculator.IsStandardProperty, isStandardBinding);
-                Binding isScientificBinding = new Binding();
-                isScientificBinding.Path = new PropertyPath("IsScientific");
-                m_calculator.SetBinding(Calculator.IsScientificProperty, isScientificBinding);
-                Binding isProgramerBinding = new Binding();
-                isProgramerBinding.Path = new PropertyPath("IsProgrammer");
-                m_calculator.SetBinding(Calculator.IsProgrammerProperty, isProgramerBinding);
-                Binding isAlwaysOnTopBinding = new Binding();
-                isAlwaysOnTopBinding.Path = new PropertyPath("IsAlwaysOnTop");
-                m_calculator.SetBinding(Calculator.IsAlwaysOnTopProperty, isAlwaysOnTopBinding);
-                m_calculator.Style = CalculatorBaseStyle;
+                if (m_calculator == null)
+                {
+                    // delay load calculator.
+                    m_calculator = new Calculator();
+                    m_calculator.Name = "Calculator";
+                    m_calculator.DataContext = m_model.CalculatorViewModel;
+                    Binding isStandardBinding = new Binding();
+                    isStandardBinding.Path = new PropertyPath("IsStandard");
+                    m_calculator.SetBinding(Calculator.IsStandardProperty, isStandardBinding);
+                    Binding isScientificBinding = new Binding();
+                    isScientificBinding.Path = new PropertyPath("IsScientific");
+                    m_calculator.SetBinding(Calculator.IsScientificProperty, isScientificBinding);
+                    Binding isProgramerBinding = new Binding();
+                    isProgramerBinding.Path = new PropertyPath("IsProgrammer");
+                    m_calculator.SetBinding(Calculator.IsProgrammerProperty, isProgramerBinding);
+                    Binding isAlwaysOnTopBinding = new Binding();
+                    isAlwaysOnTopBinding.Path = new PropertyPath("IsAlwaysOnTop");
+                    m_calculator.SetBinding(Calculator.IsAlwaysOnTopProperty, isAlwaysOnTopBinding);
+                    m_calculator.Style = CalculatorBaseStyle;
 
-                CalcHolder.Child = m_calculator;
+                    CalcHolder.Child = m_calculator;
 
-                // Calculator's "default" state is visible, but if we get delay loaded
-                // when in converter, we should not be visible. This is not a problem for converter
-                // since its default state is hidden.
-                ShowHideControls(Model.Mode);
-            }
+                    // Calculator's "default" state is visible, but if we get delay loaded
+                    // when in converter, we should not be visible. This is not a problem for converter
+                    // since its default state is hidden.
+                    ShowHideControls(Model.Mode);
+                }
 
-            if (m_dateCalculator != null)
-            {
-                m_dateCalculator.CloseCalendarFlyout();
+                if (m_dateCalculator != null)
+                {
+                    m_dateCalculator.CloseCalendarFlyout();
+                }
             }
         }
 
         private void EnsureDateCalculator()
         {
-            if (m_dateCalculator == null)
+            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureDateCalculator"))
             {
-                // delay loading converter
-                m_dateCalculator = new DateCalculator();
-                m_dateCalculator.Name = "dateCalculator";
-                m_dateCalculator.DataContext = m_model.DateCalcViewModel;
+                if (m_dateCalculator == null)
+                {
+                    // delay loading converter
+                    m_dateCalculator = new DateCalculator();
+                    m_dateCalculator.Name = "dateCalculator";
+                    m_dateCalculator.DataContext = m_model.DateCalcViewModel;
 
-                DateCalcHolder.Child = m_dateCalculator;
-            }
+                    DateCalcHolder.Child = m_dateCalculator;
+                }
 
-            if (m_calculator != null)
-            {
-                m_calculator.CloseHistoryFlyout();
-                m_calculator.CloseMemoryFlyout();
+                if (m_calculator != null)
+                {
+                    m_calculator.CloseHistoryFlyout();
+                    m_calculator.CloseMemoryFlyout();
+                }
             }
         }
 
         private void EnsureGraphingCalculator()
         {
-            if (m_graphingCalculator == null)
+            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureGraphingCalculator"))
             {
-                m_graphingCalculator = new GraphingCalculator();
-                m_graphingCalculator.Name = "GraphingCalculator";
-                m_graphingCalculator.DataContext = m_model.GraphingCalcViewModel;
+                if (m_graphingCalculator == null)
+                {
+                    m_graphingCalculator = new GraphingCalculator();
+                    m_graphingCalculator.Name = "GraphingCalculator";
+                    m_graphingCalculator.DataContext = m_model.GraphingCalcViewModel;
 
-                GraphingCalcHolder.Child = m_graphingCalculator;
+                    GraphingCalcHolder.Child = m_graphingCalculator;
+                }
             }
         }
 
         private void EnsureConverter()
         {
-            if (m_converter == null)
+            using (PerfUtils.Default.CreateScopedLog("MainPage.Converter"))
             {
-                // delay loading converter
-                m_converter = new CalculatorApp.UnitConverter();
-                m_converter.Name = "unitConverter";
-                m_converter.DataContext = m_model.ConverterViewModel;
-                m_converter.Style = UnitConverterBaseStyle;
-                ConverterHolder.Child = m_converter;
+                if (m_converter == null)
+                {
+                    // delay loading converter
+                    m_converter = new CalculatorApp.UnitConverter();
+                    m_converter.Name = "unitConverter";
+                    m_converter.DataContext = m_model.ConverterViewModel;
+                    m_converter.Style = UnitConverterBaseStyle;
+                    ConverterHolder.Child = m_converter;
+                }
             }
         }
 
