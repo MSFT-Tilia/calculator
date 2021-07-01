@@ -46,11 +46,6 @@ namespace CalculatorApp
         _cv.notify_all();
     }
 
-    PerfUtils::ScopedLog PerfUtils::CreateScopedLog(const std::wstring& content)
-    {
-        return ScopedLog(*this, content);
-    }
-
     void PerfUtils::_WorkThread()
     {
         _quit_flag.test_and_set(std::memory_order::memory_order_release);
@@ -105,7 +100,9 @@ namespace CalculatorApp
     PerfUtils::ScopedLog::ScopedLog(const std::wstring& content)
         : _utils(&PerfUtils::Default())
         , _message(content)
-    {}
+    {
+        _utils->WriteLine(L"ScopedLog | " + _message + L" | begins");
+    }
 
     PerfUtils::ScopedLog::ScopedLog(PerfUtils& utils, const std::wstring& content)
         : _utils(&utils)
