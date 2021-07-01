@@ -136,7 +136,7 @@ namespace CalculatorApp
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavigatedTo"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavigatedTo()"))
             {
                 ViewMode initialMode = ViewMode.Standard;
 
@@ -166,7 +166,7 @@ namespace CalculatorApp
 
         private void OnAppPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.OnAppPropertyChanged"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnAppPropertyChanged()"))
             {
                 string propertyName = e.PropertyName;
                 if (propertyName == ApplicationViewModel.ModePropertyName)
@@ -245,7 +245,7 @@ namespace CalculatorApp
 
         private void OnNavLoaded(object sender, RoutedEventArgs e)
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavLoaded"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavLoaded()"))
             {
                 if (NavView.SelectedItem == null)
                 {
@@ -297,7 +297,7 @@ namespace CalculatorApp
 
         private void OnNavSelectionChanged(object sender, MUXC.NavigationViewSelectionChangedEventArgs e)
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavSelectionChanged"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnNavSelectionChanged()"))
             {
                 var item = (e.SelectedItemContainer as MUXC.NavigationViewItem);
                 if (item != null)
@@ -353,7 +353,7 @@ namespace CalculatorApp
 
         private MUXC.NavigationViewItemHeader CreateNavViewHeaderFromGroup(NavCategoryGroup group)
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.CreateNavViewHeaderFromGroup"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.CreateNavViewHeaderFromGroup()"))
             {
                 var header = new MUXC.NavigationViewItemHeader();
                 header.DataContext = group;
@@ -368,7 +368,7 @@ namespace CalculatorApp
 
         private MUXC.NavigationViewItem CreateNavViewItemFromCategory(NavCategory category)
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.CreateNavViewItemFromCategory"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.CreateNavViewItemFromCategory()"))
             {
                 var item = new MUXC.NavigationViewItem();
                 item.DataContext = category;
@@ -451,7 +451,7 @@ namespace CalculatorApp
 
         private void OnPageLoaded(object sender, RoutedEventArgs args)
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.OnPageLoaded"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.OnPageLoaded()"))
             {
                 if (m_converter == null && m_calculator == null && m_dateCalculator == null && m_graphingCalculator == null)
                 {
@@ -494,7 +494,7 @@ namespace CalculatorApp
 
         private void EnsureCalculator()
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureCalculator"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureCalculator()"))
             {
                 if (m_calculator == null)
                 {
@@ -533,7 +533,7 @@ namespace CalculatorApp
 
         private void EnsureDateCalculator()
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureDateCalculator"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureDateCalculator()"))
             {
                 if (m_dateCalculator == null)
                 {
@@ -555,7 +555,7 @@ namespace CalculatorApp
 
         private void EnsureGraphingCalculator()
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureGraphingCalculator"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureGraphingCalculator()"))
             {
                 if (m_graphingCalculator == null)
                 {
@@ -570,7 +570,7 @@ namespace CalculatorApp
 
         private void EnsureConverter()
         {
-            using (PerfUtils.Default.CreateScopedLog("MainPage.Converter"))
+            using (PerfUtils.Default.CreateScopedLog("MainPage.EnsureConverter()"))
             {
                 if (m_converter == null)
                 {

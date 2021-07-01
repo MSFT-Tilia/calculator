@@ -83,7 +83,7 @@ namespace CalculatorApp
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            using (PerfUtils.Default.CreateScopedLog("App.OnLaunched"))
+            using (PerfUtils.Default.CreateScopedLog("App.OnLaunched()"))
             {
                 if (args.PrelaunchActivated)
                 {
@@ -143,7 +143,7 @@ namespace CalculatorApp
 
         private void OnAppLaunch(IActivatedEventArgs args, string argument)
         {
-            using (PerfUtils.Default.CreateScopedLog("App.OnAppLaunch"))
+            using (PerfUtils.Default.CreateScopedLog("App.OnAppLaunch()"))
             {
                 // Uncomment the following lines to display frame-rate and per-frame CPU usage info.
                 //#if _DEBUG
