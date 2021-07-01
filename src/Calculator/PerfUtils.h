@@ -17,6 +17,7 @@ namespace CalculatorApp
         class ScopedLog
         {
         public:
+            ScopedLog(const std::wstring& content);
             ScopedLog(PerfUtils& utils, const std::wstring& content);
             ScopedLog(ScopedLog&& rhs);
             ScopedLog(const ScopedLog&) = delete;
@@ -29,9 +30,6 @@ namespace CalculatorApp
             PerfUtils* _utils;
             std::wstring _message;
         };
-
-    public:
-        ScopedLog CreateScopedLog(const std::wstring& content);
 
     private:
         struct WriteRequest

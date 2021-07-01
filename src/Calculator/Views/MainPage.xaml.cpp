@@ -12,6 +12,7 @@
 #include "CalcViewModel/Common/LocalizationStringUtil.h"
 #include "Common/AppLifecycleLogger.h"
 #include "Common/KeyboardShortcutManager.h"
+#include "PerfUtils.h"
 
 using namespace CalculatorApp;
 using namespace CalculatorApp::Common;
@@ -68,6 +69,8 @@ namespace CalculatorApp::VisualStates
 MainPage::MainPage()
     : m_model(ref new ApplicationViewModel())
 {
+    PerfUtils::ScopedLog lg(L"MainPage.MainPage()");
+
     InitializeComponent();
 
     KeyboardShortcutManager::Initialize();
@@ -89,6 +92,8 @@ MainPage::MainPage()
 
 void MainPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
+    PerfUtils::ScopedLog lg(L"MainPage.OnNavigatedTo()");
+
     ViewMode initialMode = ViewMode::Standard;
     if (e->Parameter != nullptr)
     {
@@ -118,6 +123,8 @@ void MainPage::WindowSizeChanged(_In_ Platform::Object ^ /*sender*/, _In_ Window
 
 void MainPage::OnAppPropertyChanged(_In_ Platform::Object ^ sender, _In_ Windows::UI::Xaml::Data::PropertyChangedEventArgs ^ e)
 {
+    PerfUtils::ScopedLog lg(L"MainPage.OnAppPropertyChanged()");
+
     String ^ propertyName = e->PropertyName;
     if (propertyName == ApplicationViewModel::ModePropertyName)
     {
@@ -243,6 +250,8 @@ void MainPage::UpdatePanelViewState()
 
 void MainPage::OnPageLoaded(_In_ Object ^, _In_ RoutedEventArgs ^ args)
 {
+    PerfUtils::ScopedLog lg(L"MainPage.OnPageLoaded()");
+
     if (!m_converter && !m_calculator && !m_dateCalculator && !m_graphingCalculator)
     {
         // We have just launched into our default mode (standard calc) so ensure calc is loaded
@@ -302,6 +311,8 @@ void MainPage::SetDefaultFocus()
 
 void MainPage::EnsureCalculator()
 {
+    PerfUtils::ScopedLog lg(L"MainPage.EnsureCalculator()");
+
     if (!m_calculator)
     {
         // delay load calculator.
@@ -338,6 +349,8 @@ void MainPage::EnsureCalculator()
 
 void MainPage::EnsureDateCalculator()
 {
+    PerfUtils::ScopedLog lg(L"MainPage.EnsureDateCalculator()");
+
     if (!m_dateCalculator)
     {
         // delay loading converter
@@ -357,6 +370,7 @@ void MainPage::EnsureDateCalculator()
 
 void MainPage::EnsureGraphingCalculator()
 {
+    PerfUtils::ScopedLog lg(L"MainPage.EnsureGraphingCalculator()");
     if (!m_graphingCalculator)
     {
         m_graphingCalculator = ref new GraphingCalculator();
@@ -369,6 +383,7 @@ void MainPage::EnsureGraphingCalculator()
 
 void MainPage::EnsureConverter()
 {
+    PerfUtils::ScopedLog lg(L"MainPage.EnsureConverter()");
     if (!m_converter)
     {
         // delay loading converter
@@ -382,6 +397,8 @@ void MainPage::EnsureConverter()
 
 void MainPage::OnNavLoaded(_In_ Object ^ sender, _In_ RoutedEventArgs ^ e)
 {
+    PerfUtils::ScopedLog lg(L"MainPage.OnNavLoaded()");
+
     if (NavView->SelectedItem == nullptr)
     {
         auto menuItems = static_cast<IObservableVector<Object ^> ^>(NavView->MenuItemsSource);
@@ -456,6 +473,7 @@ void MainPage::OnAboutFlyoutClosed(_In_ Object ^ sender, _In_ Object ^ e)
 
 void MainPage::OnNavSelectionChanged(_In_ Object ^ sender, _In_ MUXC::NavigationViewSelectionChangedEventArgs ^ e)
 {
+    PerfUtils::ScopedLog lg(L"MainPage.OnNavSelectionChanged()");
     auto item = dynamic_cast<MUXC::NavigationViewItem ^>(e->SelectedItemContainer);
     if (item != nullptr)
     {
@@ -466,6 +484,7 @@ void MainPage::OnNavSelectionChanged(_In_ Object ^ sender, _In_ MUXC::Navigation
 
 IObservableVector<Object ^> ^ MainPage::CreateUIElementsForCategories(_In_ IObservableVector<NavCategoryGroup ^> ^ categories)
 {
+    PerfUtils::ScopedLog lg(L"MainPage.CreateUIElementsForCategories()");
     auto menuCategories = ref new Vector<Object ^>();
 
     for (auto group : categories)
@@ -483,6 +502,8 @@ IObservableVector<Object ^> ^ MainPage::CreateUIElementsForCategories(_In_ IObse
 
 MUXC::NavigationViewItemHeader ^ MainPage::CreateNavViewHeaderFromGroup(NavCategoryGroup ^ group)
 {
+    PerfUtils::ScopedLog lg(L"MainPage.CreateNavViewHeaderFromGroup()");
+
     auto header = ref new MUXC::NavigationViewItemHeader();
     header->DataContext = group;
 
@@ -495,6 +516,7 @@ MUXC::NavigationViewItemHeader ^ MainPage::CreateNavViewHeaderFromGroup(NavCateg
 
 MUXC::NavigationViewItem ^ MainPage::CreateNavViewItemFromCategory(NavCategory ^ category)
 {
+    PerfUtils::ScopedLog lg(L"MainPage.CreateNavViewItemFromCategory()");
     auto item = ref new MUXC::NavigationViewItem();
     item->DataContext = category;
 

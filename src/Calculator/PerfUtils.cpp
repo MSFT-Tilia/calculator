@@ -26,15 +26,7 @@ namespace CalculatorApp
         gmtime_s(&utc_now, &now);
 
         std::wstringstream oss;
-        oss << L"cxx.calc.perflog-"
-            << std::setw(2) << std::setfill(L'0') << utc_now.tm_mday << L"-"
-            << std::setw(2) << std::setfill(L'0') << utc_now.tm_mon + 1 << L"-"
-            << std::setw(2) << std::setfill(L'0') << utc_now.tm_year + 1900 << L"-"
-            << L"_"
-            << std::setw(2) << std::setfill(L'0') << utc_now.tm_hour << L"-"
-            << std::setw(2) << std::setfill(L'0') << utc_now.tm_min << L"-"
-            << std::setw(2) << std::setfill(L'0') << utc_now.tm_sec
-            << L".log";
+        oss << L"cxx.calc.perflog-" << _TimeStamp() << L".log";
 
         auto filename = oss.str();
         auto folder = Windows::Storage::ApplicationData::Current->LocalFolder;
@@ -49,7 +41,7 @@ namespace CalculatorApp
 
     void PerfUtils::WriteLine(const std::wstring& content)
     {
-        WriteRequest req = { content };
+        WriteRequest req = { _TimeStamp() + L" | " + content + L'\n' };
         _SubmitReq(std::move(req));
         _cv.notify_all();
     }
@@ -102,7 +94,18 @@ namespace CalculatorApp
 
     std::wstring PerfUtils::_TimeStamp()
     {
+        using namespace std::chrono;
+        return std::to_wstring(
+            duration_cast<milliseconds>(
+                system_clock::now()
+                .time_since_epoch())
+            .count());
     }
+
+    PerfUtils::ScopedLog::ScopedLog(const std::wstring& content)
+        : _utils(&PerfUtils::Default())
+        , _message(content)
+    {}
 
     PerfUtils::ScopedLog::ScopedLog(PerfUtils& utils, const std::wstring& content)
         : _utils(&utils)

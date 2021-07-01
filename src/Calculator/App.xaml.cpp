@@ -61,7 +61,7 @@ namespace CalculatorApp
 /// </summary>
 App::App()
 {
-    PerfUtils::Default().CreateScopedLog(L"App.App()");
+    PerfUtils::ScopedLog lg(L"App.App()");
     InitializeComponent();
 
     m_preLaunched = false;
@@ -196,6 +196,7 @@ Frame ^ App::CreateFrame()
 /// <param name="e">Details about the launch request and process.</param>
 void App::OnLaunched(LaunchActivatedEventArgs ^ args)
 {
+    PerfUtils::ScopedLog lg(L"App.OnLaunched()");
     if (args->PrelaunchActivated)
     {
         // If the app got pre-launch activated, then save that state in a flag
@@ -207,6 +208,7 @@ void App::OnLaunched(LaunchActivatedEventArgs ^ args)
 
 void App::OnAppLaunch(IActivatedEventArgs ^ args, String ^ argument)
 {
+    PerfUtils::ScopedLog lg(L"App.OnAppLaunch()");
     // Uncomment the following lines to display frame-rate and per-frame CPU usage info.
     //#if _DEBUG
     //    if (IsDebuggerPresent())
