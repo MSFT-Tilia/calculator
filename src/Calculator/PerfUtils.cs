@@ -39,7 +39,7 @@ namespace CalculatorApp
         public PerfUtils()
         {
             var date = DateTime.UtcNow;
-            var filename = $"calc.perflog-{date.ToString("dd-MM-yy_hh-mm-ss-ff")}.log";
+            var filename = $"cs.calc.perflog-{_TimeStamp()}.log";
 
             StorageFolder storageFolder =
                 ApplicationData.Current.LocalFolder;
@@ -58,8 +58,7 @@ namespace CalculatorApp
         public void WriteLine(string content)
         {
             var date = DateTime.UtcNow;
-            var prefix = $"{date.ToString("dd-MM-yy hh:mm:ss.ff")} | ";
-            _SubmitReq(new WriteRequest { Content = $"{prefix}{content}\n" });
+            _SubmitReq(new WriteRequest { Content = $"{_TimeStamp()} | {content}\n" });
             lock(_workthread)
             {
                 Monitor.Pulse(_workthread);
@@ -117,6 +116,11 @@ namespace CalculatorApp
 
             req = null;
             return false;
+        }
+
+        private string _TimeStamp()
+        {
+            return $"{DateTimeOffset.Now.ToUnixTimeMilliseconds()}";
         }
 
         private Windows.Storage.StorageFile _file;
