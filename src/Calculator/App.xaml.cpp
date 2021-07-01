@@ -14,6 +14,8 @@
 #include "CalcViewModel/Common/LocalizationSettings.h"
 #include "Views/MainPage.xaml.h"
 
+#include "PerfUtils.h"
+
 using namespace CalculatorApp;
 using namespace CalculatorApp::Common;
 using namespace CalculatorApp::Common::Automation;
@@ -59,6 +61,7 @@ namespace CalculatorApp
 /// </summary>
 App::App()
 {
+    PerfUtils::Default().CreateScopedLog(L"App.App()");
     InitializeComponent();
 
     m_preLaunched = false;

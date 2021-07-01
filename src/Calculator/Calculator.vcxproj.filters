@@ -329,6 +329,7 @@
     </ClCompile>
     <ClCompile Include="Common\ViewState.cpp" />
     <ClCompile Include="Utils\DispatcherTimerDelayer.cpp" />
+    <ClCompile Include="PerfUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -437,6 +438,7 @@
     </ClInclude>
     <ClInclude Include="Common\ViewState.h" />
     <ClInclude Include="Utils\DispatcherTimerDelayer.h" />
+    <ClInclude Include="PerfUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
